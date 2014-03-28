@@ -28,7 +28,7 @@ function [T, X] = net1sim_lin(p, X0, mode, tspan)
 
 % Check input parameters
 if (length(p)~= 11); disp('Parameter vector should be 11x1'); end;
-if ~ismember(mode, {'CME','Noise', 'langevin','langevinExact','ODE'}); disp('Illegal mode'); end;
+if ~ismember(mode, {'CME','Noise', 'langevin','langevinExact','ODE','ODE_afterSS'}); disp('Illegal mode'); end;
 
 stoich_matrix = [ 1 0 0 ; % prod. A
     -1 0 0 ; % deg. A
@@ -49,7 +49,7 @@ switch mode
     case 'langevinExact'
         simMode = @langevinExact;
         simFun = @prop_fcn_net1_lin;
-    case 'ODE'
+    case {'ODE','ODE_afterSS'}
         simMode = @deterministicODE;
         simFun = @ODE_fcn_net1_lin;
     case 'Noise'
@@ -61,28 +61,32 @@ switch mode
 end
  
 %Get to steady state
-[T1,X1] = simMode(stoich_matrix, simFun, [1 100], X0, p);
+u = 0.5;
+[T1,X1] = simMode(stoich_matrix, simFun, [1 100], X0, p, u);
 %Pulse
-p(1) = p(1).*5;
-[T2,X2] = simMode(stoich_matrix, simFun, tspan, X1(end,:), p);
-
-T = [T1(1:end-1); T2+T1(end)];
-X = [X1(1:end-1,:); X2];
+u = 0.6;
+[T2,X2] = simMode(stoich_matrix, simFun, tspan, X1(end,:), p, u);
+if strcmp(mode, 'ODE_afterSS')
+    T = T2;
+    X = X2;
+else
+    T = [T1(1:end-1); T2+T1(end)];
+    X = [X1(1:end-1,:); X2];
+end
 end
 
 
-function a = prop_fcn_net1_lin(X, p)
-u = p(1);
-c1 = p(2);
-c2= p(3);
-c3 = p(4);
-c4 = p(5);
-c5 = p(6);
-c6 = p(7);
-c7 = p(8);
-AT = p(9);
-BT = p(10);
-CT = p(11);
+function a = prop_fcn_net1_lin(X, p, u)
+c1 = p(1);
+c2= p(2);
+c3 = p(3);
+c4 = p(4);
+c5 = p(5);
+c6 = p(6);
+c7 = p(7);
+AT = p(8);
+BT = p(9);
+CT = p(10);
 
 % S = [1 X]';
 % m = [c1.*u.*AT -c1.*u 0 0;
@@ -119,18 +123,17 @@ a = prop_fcn_net1_lin(X,p);
 noise = sum(stoich_matrix.*repmat(sqrt(a),1,n));
 end
 
-function dydt = ODE_fcn_net1_lin(t, X, p)
-u = p(1);
-c1 = p(2);
-c2= p(3);
-c3 = p(4);
-c4 = p(5);
-c5 = p(6);
-c6 = p(7);
-c7 = p(8);
-AT = p(9);
-BT = p(10);
-CT = p(11);
+function dydt = ODE_fcn_net1_lin(t, X, p, u)
+c1 = p(1);
+c2= p(2);
+c3 = p(3);
+c4 = p(4);
+c5 = p(5);
+c6 = p(6);
+c7 = p(7);
+AT = p(8);
+BT = p(9);
+CT = p(10);
 
 A = X(1);
 B = X(2);
