@@ -1,4 +1,4 @@
-addpath(genpath('C:\Users\Judy\Documents\'));
+addpath(genpath('/home/jsav/Documents/ChemSims'));
 % Script to search for parameters that give adaptation
 
 
@@ -10,17 +10,17 @@ X0 = [100 100 100];
 mode = 'ODE_afterSS';
 tspan = [0 100];
 
-p = zeros(10,1);
-paramSetSize = 200;
+
+paramSetSize = 10^4;
 paramRange = 5; % number of orders or mag above and below 1.
 
-out = zeros(paramSetSize, length(p)+ 4); % 4 output metrics, start, peak, peaktime, end 
+out = zeros(paramSetSize, 14); % 4 output metrics, start, peak, peaktime, end 
 telapsed = zeros(paramSetSize,1);
-for iter = 1:paramSetSize
-    disp(iter);
+parfor iter = 1:paramSetSize
+
 % Choose rand params
-%p(1:7) = 2.^(10.*rand(7,1)-5);
-p(1:7) = 2.^(2.*rand(7,1)-1);
+p = zeros(10,1);
+p(1:7) = 10.^(10.*rand(7,1)-3);
 p(8:10) = [400 400 400]; % in the future make these variable as well
 
 % Simulate
@@ -35,5 +35,6 @@ Cend = X(end, 3);
 
 out(iter, :) = [p', Cstart, Cmax, CpeakTime, Cend]; 
 end
+
 hist(telapsed)
-save('ParamSearchTest.mat', 'out');
+save('ParamSearchOutSet.mat', 'out');

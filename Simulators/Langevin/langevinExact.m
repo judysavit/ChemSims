@@ -1,4 +1,4 @@
-function [t,x] = langevinApprox(stoich_matrix, propensity_fcn, tspan, x0, rate_params)
+function [t,x] = langevinApprox(stoich_matrix, propensity_fcn, tspan, x0, rate_params, u)
 %   Returns:
 %       t:              time vector          (Nreaction_events x 1)
 %       x:              species amounts      (Nreaction_events x Nspecies)    
@@ -39,7 +39,7 @@ cumnoise = cumsum(rnoise);
 noise = spline(tVect,cumnoise);
 end
 
-[T,X] = ode45(odefun, tspan, x0, [], stoich_matrix, propensity_fcn, noise, rate_params );
+[T,X] = ode45(odefun, tspan, x0, [], stoich_matrix, propensity_fcn, noise, rate_params, u );
 
 % Record output
 t = T; % later can do this with a solver and deval, unsure what mesh to use now
@@ -47,8 +47,8 @@ x = X;
 
 end
 
-function dydt = langevinODE_exact(T,X,stoich_matrix,prop_fcn,noise,p)
-    a = prop_fcn(X',p);
+function dydt = langevinODE_exact(T,X,stoich_matrix,prop_fcn,noise,p,u)
+    a = prop_fcn(X',p,u);
     dydt = sum(stoich_matrix.*repmat(a,1,3))';   
 end
 

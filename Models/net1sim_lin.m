@@ -27,7 +27,7 @@ function [T, X] = net1sim_lin(p, X0, mode, tspan)
 %   3 total A, B, C constraints (AT, BT, CT)
 
 % Check input parameters
-if (length(p)~= 11); disp('Parameter vector should be 11x1'); end;
+%telapif (length(p)~= 11); disp('Parameter vector should be 11x1'); end;
 if ~ismember(mode, {'CME','Noise', 'langevin','langevinExact','ODE','ODE_afterSS'}); disp('Illegal mode'); end;
 
 stoich_matrix = [ 1 0 0 ; % prod. A
@@ -63,10 +63,11 @@ end
 %Get to steady state
 u = 0.5;
 [T1,X1] = simMode(stoich_matrix, simFun, [1 100], X0, p, u);
-%Pulse
-u = 0.6;
+%Step up input
+u = 1;
 [T2,X2] = simMode(stoich_matrix, simFun, tspan, X1(end,:), p, u);
 if strcmp(mode, 'ODE_afterSS')
+    disp('WHY WAS I HER')
     T = T2;
     X = X2;
 else
