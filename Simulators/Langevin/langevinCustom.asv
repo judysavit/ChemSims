@@ -1,4 +1,4 @@
-function [t,x] = langevinCustom(stoich_matrix, propensity_fcn, tspan, x0, rate_params)
+function [t,x] = langevinCustom(stoich_matrix, propensity_fcn, tspan, x0, rate_params,u)
 %   Returns:
 %       t:              time vector          (Nreaction_events x 1)
 %       x:              species amounts      (Nreaction_events x Nspecies)    
@@ -21,24 +21,28 @@ function [t,x] = langevinCustom(stoich_matrix, propensity_fcn, tspan, x0, rate_p
 
 
 % Choice of tau is critical.
-tau = 0.001; % in sec.
+tau = 0.00001; % in sec.
 tVect = tspan(1):tau:tspan(2); tVect = tVect';
-tLen = length(tVect);
+tLen = length(tVect); 
 
 n = length(x0); % n is number of species
+m = size(stoich_matrix,1); % m is the number of rxns
 X = zeros(tLen, n);
 X(1,:)=x0;
 
 % Create correlated noise
-rNoise = randn(size(stoich_matrix,1),tLen);
-corrNoise = cumsum(rNoise,2);
-
-%% MAIN LOOP
+rNoise = permute(repmat(randn(m,tLen)',[1,1,n]),[2 3 1]);
+stochTerm = repmat(stoich_matrix, [1,1,tLen]).*rNoise;
 
 for i = 1:tLen-1
-    a = propensity_fcn(X(i,:),rate_params).*tau;
-    exactTerm = sum(stoich_matrix.*repmat(a,1,n).*tau)+ stoich_matrix.*repmat(sqrt(a),1,n).*randn(size(stoich_matrix)).*sqrt(tau));%repmat(corrNoise(:,i),1,n));
-    X(i+1,:) = X(i,:)+exactTerm + noiseTerm;
+    a = repmat(propensity_fcn(X(i,:),rate_params,u).*tau,1,n);
+    if (any(a)<0)
+        disp(['PROP < 0 at ' num2str(i)]);
+    end
+    exactTerm = stoich_matrix.*a;
+    noiseTerm = stochTerm(:,:,i).*sqrt(a);%repmat(corrNoise(:,i),1,n));
+    tempX = X(i,:)+sum(exactTerm + noiseTerm,1);
+    X(i+1,:) = ternif( any(tempX)<0, X(i,:), tempX );
 end
 
 % Record output

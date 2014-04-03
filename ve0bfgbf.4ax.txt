@@ -1,0 +1,23 @@
+﻿
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+# On branch master
+# Changes to be committed:
+#   (use "git reset HEAD <file>..." to unstage)
+#
+#	new file:   Models/Net1LinModel.asv
+#	new file:   Models/Net1LinModel_BC.asv
+#	new file:   Models/Net1LinModel_BC.m
+#	modified:   Models/net1sim_lin.asv
+#	modified:   Models/net1sim_lin.m
+#	new file:   Simulators/Langevin/isAdaptive.asv
+#	new file:   Simulators/Langevin/isAdaptive.m
+#	modified:   Simulators/Langevin/langevinCustom.asv
+#	modified:   Simulators/Langevin/langevinCustom.m
+#	new file:   Simulators/ODE/ODESimulator.asv
+#	new file:   Simulators/ODE/ODESimulator.m
+#	modified:   Simulators/ODE/deterministicODE.m
+#	new file:   Simulators/Simulators.asv
+#	new file:   Simulators/Simulators.m
+#
+

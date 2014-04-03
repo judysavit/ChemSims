@@ -1,0 +1,9 @@
+classdef Simulators
+    properties (Abstract)
+        input;
+        deltaInput;
+    end
+    methods (Abstract)
+        a = simulate(netModel, tspan, X0);
+    end
+end

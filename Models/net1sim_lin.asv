@@ -27,7 +27,7 @@ function [T, X] = net1sim_lin(p, X0, mode, tspan)
 %   3 total A, B, C constraints (AT, BT, CT)
 
 % Check input parameters
-%if (length(p)~= 11); disp('Parameter vector should be 11x1'); end;
+%telapif (length(p)~= 11); disp('Parameter vector should be 11x1'); end;
 if ~ismember(mode, {'CME','Noise', 'langevin','langevinExact','ODE','ODE_afterSS'}); disp('Illegal mode'); end;
 
 stoich_matrix = [ 1 0 0 ; % prod. A
@@ -61,12 +61,13 @@ switch mode
 end
  
 %Get to steady state
-u = 0.5;
-[T1,X1] = simMode(stoich_matrix, simFun, [1 100], X0, p, u);
-%Pulse
-u = 0.6;
+u = 1;
+[T1,X1] = simMode(stoich_matrix, simFun, [0 10], X0, p, u);
+%Step up input
+u = 2;
 [T2,X2] = simMode(stoich_matrix, simFun, tspan, X1(end,:), p, u);
 if strcmp(mode, 'ODE_afterSS')
+    disp('WHY WAS I HERE?')
     T = T2;
     X = X2;
 else
@@ -77,7 +78,7 @@ end
 
 
 function a = prop_fcn_net1_lin(X, p, u)
-c1 = p(1);
+c1 = 1; %p(1);
 c2= p(2);
 c3 = p(3);
 c4 = p(4);
@@ -100,9 +101,11 @@ CT = p(10);
 % a = m*S;
     
 % Alternative implementation:
+
 A = X(1);
 B = X(2);
 C = X(3);
+if A==0||B==0||C==0; error('Error line 108, negative molecules');end;
 a(1) = c1.*u.*(AT-A); 
 a(2) = c2.*A; 
 a(3) = c3.*A.*(BT-B);
@@ -111,6 +114,7 @@ a(5) = c5.*A.*(CT-C);
 a(6) = c6.*B.*C;
 a(7) = c7.*C;
 a = a';
+if any(a)<0; disp('LESS THAN ZERO'); disp(a);end
 
 % Implementation improvement: do matrix multiplication by the stoich
 % matrix.
@@ -124,7 +128,7 @@ noise = sum(stoich_matrix.*repmat(sqrt(a),1,n));
 end
 
 function dydt = ODE_fcn_net1_lin(t, X, p, u)
-c1 = p(1);
+c1 = 1;% p(1);
 c2= p(2);
 c3 = p(3);
 c4 = p(4);
@@ -138,7 +142,7 @@ CT = p(10);
 A = X(1);
 B = X(2);
 C = X(3);
-
+if A==0||B==0||C==0; error('Error line 108, negative molecules');end;
 dydt = [c1*u.*(AT-A) - c2.*A;
     c3.*A.*(BT-B) - c4.*B;
     c5.*A.*(CT-C) - c6.*B.*C - c7.*C];

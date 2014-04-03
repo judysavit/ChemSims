@@ -22,8 +22,8 @@ function [t,x] = deterministicODE(stoich_matrix, ode_fcn, tspan, x0, rate_params
 %% MAIN LOOP
 % ASSUME UNIT VOLUME FOR SIMPLICITY - no need to change parameters
 
-%opts = odeset('OutputFcn',@odephas3);
-[T,X] = ode45(ode_fcn, tspan, x0, [], rate_params, u);
+opts  = odeset('RelTol',1e-4, 'AbsTol', 1e-6, 'MaxStep',1);
+[T,X] = ode45(ode_fcn, tspan, x0, opts, rate_params, u);
 
 % Record output
 t = T; % later can do this with a solver and deval, unsure what mesh to use now
