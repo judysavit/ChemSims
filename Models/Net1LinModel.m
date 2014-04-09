@@ -10,16 +10,16 @@ classdef Net1LinModel < NetModels
             0 0 -1 ; %inh. C by B
             0 0 -1]; %deg. C
         params = zeros(1,10);
-        input = 1;
+        input = 0;
     end
     methods 
-        function model = Net1LinModel(paramSet,input)
+        function model = Net1LinModel(paramSet, input)
             model.params = paramSet;
-            model.input = input;
+            this.input = input;
         end
         function a = prop_fcn(this, X)
             p = this.params;
-            u = this.input;
+            u=this.input;
             c1 = p(1);
             c2= p(2);
             c3 = p(3);
@@ -45,7 +45,7 @@ classdef Net1LinModel < NetModels
         end
         function dXdt = ODE_fcn(this, t,X)
             p = this.params;
-            u = this.input;
+            u=this.input;
             c1 = p(1);
             c2= p(2);
             c3 = p(3);

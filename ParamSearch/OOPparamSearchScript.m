@@ -1,31 +1,30 @@
 addpath(genpath('/home/jsav/Documents/ChemSims'));
-% Script to search for parameters that give adaptation
+addpath(genpath('C:\Users\Judy\Documents\Noise Exploration\ChemSims'));
 
-
-
-% Linear, implicit BC system
-model = @net1sim_lin; 
-N = 3; 
-X0 = [100 100 100];
-mode = 'ODE_afterSS';
-tspan = [0 100];
-
-
-paramSetSize = 10^2;
+paramSetSize = 10;%^4;
 paramRange = 5; % number of orders or mag above and below 1.
-
 out = zeros(paramSetSize, 14); % 4 output metrics, start, peak, peaktime, end 
 telapsed = zeros(paramSetSize,1);
+
+p = zeros(10,1); 
+p(8:10) = [400 400 400]; % in the future make these variable as well
+
+input = 1;
+delInput = 0.2;
+
+nl = Net1LinModel(p, input);
+X0 = [100 100 100];
+odeSim = ODESimulator();
 for iter = 1:paramSetSize
 
 % Choose rand params
-p = zeros(10,1);
-p(1:7) = 2.^(paramRange.*rand(7,1)-paramRange/2);
-p(8:10) = [400 400 400]; % in the future make these variable as well
+p(1:7) = 2.^(paramRange.*rand(7,1)-paramRange./2);
+nl.params = p;
 
 % Simulate
 start = tic;
-[T, X] = model(p, X0, mode, tspan);
+X_ss = odeSim.initialize(nl, X0);
+[T,X] = odeSim.simulate(nl, [1, 100], delInput, X_ss);
 telapsed(iter) = toc(start);
 % Store output statistics
 Cstart = X(1,3);
@@ -35,9 +34,3 @@ Cend = X(end, 3);
 
 out(iter, :) = [p', Cstart, Cmax, CpeakTime, Cend]; 
 end
-
-hist(telapsed)
-save('ParamSearchOutSet_1_12.mat', 'out');
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-

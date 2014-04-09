@@ -62,12 +62,11 @@ end
  
 %Get to steady state
 u = 1;
-[T1,X1] = simMode(stoich_matrix, simFun, [0 2], X0, p, u);
+[T1,X1] = simMode(stoich_matrix, simFun, [0 20], X0, p, u);
 %Step up input
-u = 1.2;
+u = 2;
 [T2,X2] = simMode(stoich_matrix, simFun, tspan, X1(end,:), p, u);
 if strcmp(mode, 'ODE_afterSS')
-    disp('WHY WAS I HERE?')
     T = T2;
     X = X2;
 else
@@ -105,7 +104,7 @@ CT = p(10);
 A = X(1);
 B = X(2);
 C = X(3);
-if A==0||B==0||C==0; error('Error line 108, negative molecules');end;
+if A<0||B<0||C<0; error('negative molecules');end;
 a(1) = c1.*u.*(AT-A); 
 a(2) = c2.*A; 
 a(3) = c3.*A.*(BT-B);

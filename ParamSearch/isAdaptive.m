@@ -1,4 +1,5 @@
-function bool = isAdaptive(C0,Cpeak,Css,IO,deltaIO)
+
+function [bool varargout] = isAdaptive(C0,Cpeak,Css,IO,deltaIO)
 % BOOL = isAdaptive(C0,Cpeak,Css,IO,deltaIO)
 %
 % Returns a boolean for adaptivity. Input parameter "out" is a 4-entry
@@ -21,3 +22,5 @@ if S>-0.5 && P>1
 else
     bool =false;
 end
+varargout{1} = S;
+varargout{2} = P;

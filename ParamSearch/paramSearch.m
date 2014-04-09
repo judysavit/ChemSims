@@ -12,7 +12,7 @@ tspan = [0 100];
 
 
 paramSetSize = 10^4;
-paramRange = 5; % number of orders or mag above and below 1.
+paramRange = 6; % number of orders or mag above and below 1.
 
 out = zeros(paramSetSize, 14); % 4 output metrics, start, peak, peaktime, end 
 telapsed = zeros(paramSetSize,1);
@@ -20,7 +20,7 @@ parfor iter = 1:paramSetSize
 
 % Choose rand params
 p = zeros(10,1);
-p(1:7) = 10.^(10.*rand(7,1)-3);
+p(1:7) = 2.^(paramRange.*rand(7,1)-paramRange/2);
 p(8:10) = [400 400 400]; % in the future make these variable as well
 
 % Simulate
@@ -37,4 +37,7 @@ out(iter, :) = [p', Cstart, Cmax, CpeakTime, Cend];
 end
 
 hist(telapsed)
-save('ParamSearchOutSet.mat', 'out');
+save('ParamSearchOutSet_1_2.mat', 'out');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
