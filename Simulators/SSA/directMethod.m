@@ -1,6 +1,10 @@
 function [ t, x ] = directMethod( stoich_matrix, propensity_fcn, tspan, x0,...
-                                  rate_params, u, output_fcn, MAX_OUTPUT_LENGTH)
-%DIRECTMETHOD Implementation of the Direct Method variant of the Gillespie algorithm
+                                  rate_params, output_fcn, MAX_OUTPUT_LENGTH)
+% My implementation changes:
+% function [ t, x ] = directMethod( stoich_matrix, propensity_fcn, tspan, x0, rate_params, output_fcn, MAX_OUTPUT_LENGTH)
+% 
+% 
+% DIRECTMETHOD Implementation of the Direct Method variant of the Gillespie algorithm
 %   Based on: Gillespie, D.T. (1977) Exact Stochastic Simulation of Coupled
 %   Chemical Reactions. J Phys Chem, 81:25, 2340-2361.
 %
@@ -65,7 +69,7 @@ rxn_count = 1;
 %% MAIN LOOP
 while T(rxn_count) < tspan(2)        
     % Calculate reaction propensities
-    a  = propensity_fcn(X(rxn_count,:), rate_params, u);
+    a  = propensity_fcn(X(rxn_count,:));
     
     % Compute tau and mu using random variates
     a0 = sum(a);

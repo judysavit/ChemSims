@@ -1,4 +1,6 @@
-function [t,x] = deterministicODE(stoich_matrix, ode_fcn, tspan, x0, rate_params, u)
+function [t,x] = deterministicODE(ode_fcn, tspan, x0, outputFcn)
+% function [t,x] = deterministicODE(ode_fcn, tspan, x0, rate_params, input,
+% outputFcn)
 %   Returns:
 %       t:              time vector          (Nreaction_events x 1)
 %       x:              species amounts      (Nreaction_events x Nspecies)    
@@ -17,28 +19,20 @@ function [t,x] = deterministicODE(stoich_matrix, ode_fcn, tspan, x0, rate_params
 %                       The function should return vector ac of 
 %                       propensities (Nreactions x 1) in the same order as
 %                       the reactions given in stoich_matrix.
-%       rate_params:    These will be passed to the propensity function
+
 
 %% MAIN LOOP
 % ASSUME UNIT VOLUME FOR SIMPLICITY - no need to change parameters
 
-opts  = odeset('RelTol',1e-4, 'AbsTol', 1e-6, 'MaxStep',1);
-[T,X] = ode45(ode_fcn, tspan, x0, opts, rate_params, u);
+if ~exist('outputFcn','var'); outputFcn = []; end;
+
+opts  = odeset('RelTol',1e-4, 'AbsTol', 1e-6, 'MaxStep',1, 'OutputFcn',outputFcn);
+[T,X] = ode15s(ode_fcn, tspan, x0, opts);
 
 % Record output
 t = T; % later can do this with a solver and deval, unsure what mesh to use now
 x = X;  
 
-end
-
-function status = plotDuring(t,y, flag)
-    if flag == []
-       figure(gcf);
-       hold on;
-       plot(t,y);
-    end
-    disp(t);
-    disp(y);
 end
 
 

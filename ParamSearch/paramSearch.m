@@ -14,7 +14,9 @@ tspan = [0 100];
 paramSetSize = 10^4;
 paramRange = 6; % number of orders or mag above and below 1.
 
-out = zeros(paramSetSize, 14); % 4 output metrics, start, peak, peaktime, end 
+% Structure of the output file: 
+% 10, params, 2 input metrics (input to ss, deltaInput), 4 output metrics (Cstart, Cpeak, Cpeaktime, Cend) 
+out = zeros(paramSetSize, 14); 
 telapsed = zeros(paramSetSize,1);
 parfor iter = 1:paramSetSize
 
