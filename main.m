@@ -19,3 +19,27 @@ X0 = outAll(1:3, tr);
 XSS = outAll(4:6, tr);
 
 
+%% Compare results from simulators 
+clear all;
+netType = @Net1LinModel;
+paramSet = [.01 .2 0.002 .2 .02 .01 0.2 10^3 10^3 10^3];
+
+model = netType(paramSet, 1, 0.2);
+model.initialize();
+
+figure();
+sims = {'CME','langevin','ODE'};
+for s = 1:length(sims)
+    [T,X]=model.simulate(sims{s});
+    
+    % Plot time course
+    subplot(1,length(sims),s)
+    plot(T,X); hold on;
+    xlabel('Time (s)');
+    if s ==1
+        ylabel('# Molecules');
+    end
+    title(sims{s});
+end
+leg= model.speciesList;
+legend(leg);

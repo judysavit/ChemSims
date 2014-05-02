@@ -1,0 +1,29 @@
+function [Dout, A] = appendAdaptivity(D)
+
+%% Find sensitivity and precision and add to Data File
+if ~ismember(D.headings,'Sensitivity')
+    D.headings{end+1}='Sensitivity';
+    D.headings{end+2}='Precision';
+end
+nSims = size(D.paramSet,1);
+D.dataProc = [D.dataProc(:,1:6) zeros(nSims,2)];
+
+A.headings = D.headings;
+A.headingsDataProc = D.headingsDataProc;
+A.adaptiveInds = zeros(nSims,1);
+
+for i = 1:nSims
+   Cstart = D.dataProc(i,strcmp(D.headingsDataProc,'Cstart'));
+   Cmax = D.dataProc(i, strcmp(D.headingsDataProc,'Cmax'));
+   Cend = D.dataProc(i, strcmp(D.headingsDataProc,'Cend'));
+   IO = D.dataProc(i, strcmp(D.headingsDataProc,'input'));
+   deltaIO = D.dataProc(i, strcmp(D.headingsDataProc,'deltaInput'));
+   [A.adaptiveInds(i) S P ]=isAdaptive(Cstart,Cmax,Cend,IO,deltaIO);
+   D.dataProc(i,end+1) = S;
+   D.dataProc(i,end+2) = P;
+end
+
+Dout = D;
+end
+
+

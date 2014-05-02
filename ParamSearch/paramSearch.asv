@@ -1,45 +1,70 @@
 addpath(genpath('/home/jsav/Documents/ChemSims'));
 % Script to search for parameters that give adaptation
 
+%Headers
+clear D A 
+
+homePath = 'C:\Users\Judy\Documents\Noise Exploration\ChemSims\Models\';
+%homePath = '~/Documents/ChemSims/Models/';
+
+%Find the data:
+dataPath = 'Data Lin Impl BC Data/';
+D=importdata([homePath dataPath 'ParamSearch_c1_constant.mat']);
 
 
-% Linear, implicit BC system
-model = @net1sim_lin; 
-N = 3; 
-X0 = [100 100 100];
-mode = 'ODE_afterSS';
-tspan = [0 100];
+%% Find adaptive params and save as substruct with todays date and data generation methodology
+%[D A]=appendAdaptivity(D);
+[D A]=appendAdaptivityPar(D);
+
+% Record the current iteration of isAdaptive here:
+isAdaptiveFxn = 'Z = deltaIO./IO; S = log10((abs(Cpeak-C0)./C0)./Z); P = log10(Z.*C0)-log10(abs(Css-C0)); if S>-0.5 && P>1; bool = true; else bool =false; end varargout{1} = S; varargout{2} = P;';
+D.A_041414.inds = A.adaptiveInds;
+D.A_041414.fxn = isAdaptiveFxn;
+D.A_041414.IO = [D(1,strcmp(D.headingsDataProc,'input')) D(1,strcmp(D.headingsDataProc,'deltaInput'))]; 
+save([homePath dataPath 'ParamSearch_c1_constant.mat'],'D');
 
 
-paramSetSize = 10^4;
-paramRange = 6; % number of orders or mag above and below 1.
+A.paramSet = [];
+A.dataProc = [];
+A.fxn = isAdaptiveFxn;
+A.paramSet = D.paramSet(A.adaptiveInds==1,:);
+A.dataProc = D.dataProc(A.adaptiveInds==1,:);
 
-% Structure of the output file: 
-% 10, params, 2 input metrics (input to ss, deltaInput), 4 output metrics (Cstart, Cpeak, Cpeaktime, Cend) 
-out = zeros(paramSetSize, 14); 
-telapsed = zeros(paramSetSize,1);
-parfor iter = 1:paramSetSize
+%% ALL PARAMS: Explore relationship between parameters, sensitivity, and precision
 
-% Choose rand params
-p = zeros(10,1);
-p(1:7) = 2.^(paramRange.*rand(7,1)-paramRange/2);
-p(8:10) = [400 400 400]; % in the future make these variable as well
+figure();
+outLabels = {'Sensitivity','Precision','PeakTime'};
+outInds = [7 8 5];
+for out = 1:3
+    for c = 1:7
+        subplot(3,7,(out-1)*7+c)
+        xvals = D.paramSet(:,c);
+        yvals = D.dataProc(:,outInds(out));
+        scatter(xvals,yvals);
+        if (out==3); xlabel(D.headings{c}); end;
+        if (out==1 && c==7); title('All Param Sets'); end;
+    end
+    subplot(3,7,(out-1)*7+1);
+    ylabel(outLabels{out});
+end
+clear D;
 
-% Simulate
-start = tic;
-[T, X] = model(p, X0, mode, tspan);
-telapsed(iter) = toc(start);
-% Store output statistics
-Cstart = X(1,3);
-[Cmax maxInd] = max(X(:,3));
-CpeakTime = T(maxInd);
-Cend = X(end, 3);
-
-out(iter, :) = [p', Cstart, Cmax, CpeakTime, Cend]; 
+%% Adaptive Params: Explore relationship between parameters, sensitivity, and precision
+figure();
+outLabels = {'Sensitivity','Precision','PeakTime'};
+outInds = [7 8 5];
+for out = 1:3
+    for c = 1:7
+        subplot(3,7,(out-1)*7+c)
+        xvals = A.paramSet(:,c);
+        yvals = A.dataProc(:,outInds(out));
+        scatter(xvals,yvals);
+        if (out==3); xlabel(A.headings{c}); end;
+        if (out==1 && c==7); title('Adaptive Param Sets'); end;
+    end
+    subplot(3,7,(out-1)*7+1);
+    ylabel(outLabels{out});
 end
 
-hist(telapsed)
-save('ParamSearchOutSet_1_2.mat', 'out');
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+A.date = '041414';
+save([homePath dataPath 'Adaptive_c1_constant.mat'],'A');

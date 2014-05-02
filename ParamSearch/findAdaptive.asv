@@ -1,8 +1,0 @@
-
-D=importdata('ParamSearchOutSet_1_12.mat');
-input  = 1;
-delInput = 0.2;
-    
-isAdaptive(C0,Cpeak,Css,IO,deltaIO)
-
-outAdapt = out(inds, :);
